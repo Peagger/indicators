@@ -1,10 +1,12 @@
 import pandas as pd
 import numpy as np
 def get_avgminroute(file):
-    df = pd.read_csv(file,header = 0)
-    df.dropna(inplace = True)
+    df = pd.read_csv(file,header = None)
+    # df.dropna(inplace = True)
+    print(df[1])
+    print(df)
     mylist = []
-    for i in range(2,20,2):
+    for i in range(4,100,2):
         # row=df[(df[0]==str(num))&(df[1]=="+"+str(time)+"s")& (df[5]=="1")].shape[0]
         mylist.append(df[df[1]=="+"+str(i)+"s"])
     listmartix = []
