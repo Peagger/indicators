@@ -1,6 +1,9 @@
 
 import pandas as pd
 import numpy as np
+import networkx as nx
+import networkx.algorithms.components as com
+import matplotlib.pyplot as plt
 import math
 class Indicators():
     def __init__(self,csvpath='routes4.csv',nums=20,times=100,interval=1,start=3,end=100,kconnect=[2,3,20]):
@@ -191,18 +194,65 @@ class Indicators():
     def genAvgConcenDegree(self):
         pass
     def genConCeot(self):
+        df=self.df
+        df.dropna(axis = 0, inplace = True)
+        df=df[~(df[0]=='Node')]
+        df.reset_index(drop=True, inplace=True)
+        dic = {}
+        for index in range(df.shape[0]):
+            t = eval(df[1][index][1: -1])
+            startNode = eval(df[0][index]) + 1
+            nextNode = eval(df[3][index][7:])
+            nowDistance = df[5][index]
+            dic.setdefault(t, {}).setdefault(startNode, []).append(nextNode)
+        G = nx.MultiDiGraph()
+        G.add_nodes_from(range(1, self.nums+1))
+        n = G.number_of_nodes()
+        C = []
+        for t in dic:
+            for startV in dic[t]:
+                for endV in dic[t][startV]:
+                    keys = G.add_edge(startV, endV)
+            w = com.number_weakly_connected_components(G)
+            #print(w)
+            sum = 0
+            for index in com.weakly_connected_components(G):
+                subG = G.subgraph(index)
+                subN = subG.number_of_nodes()
+                #print('subG\'s number:', subG.number_of_nodes())
+                averShortestLenOfSubG = nx.average_shortest_path_length(subG)
+                #print(averShortestLenOfSubG)
+                sum += averShortestLenOfSubG * subN
+            C.append(n / (w * sum))
+        self.con_coet=C
         pass
     def genIndicator(self):
         self.genAvgNodeDegree()
         self.genAvgMinRoute()
         self.genKConnectivity()
+        self.genAvgConcenDegree()
+        self.genConCeot()
         pass
     def showIndicator(self):
         self.genIndicator()
         for indicator in [self.avg_node_degree,self.avg_min_route,self.kconnectivity,self.avg_concen_degree,self.con_coet]:
-            print('{}项'.format(len(indicator)))
-            print(indicator)
-
+            print('{}项'.format(len(indicator)),end='')
+            #print(indicator)
+        x_time = []
+        for i in range(self.start,self.end+1,1):
+            x_time.append(i)
+        for indicator in [self.avg_node_degree,self.avg_min_route,self.avg_concen_degree,self.con_coet]:
+            if(len(indicator)==len(x_time)):
+                plt.figure()
+                plt.plot(x_time, indicator, color = 'red',)
+        for indicator in self.kconnectivity:
+            if(len(indicator)==len(x_time)):
+                plt.figure()
+                plt.plot(x_time, indicator, color = 'red',)
+        plt.show()
         pass
-i=Indicators(csvpath='routes.csv',nums=30,start=3,end=50,kconnect=[2,3])
+        
+
+
+i=Indicators(csvpath='routes.csv',nums=30,start=3,end=50,kconnect=[2,5])
 i.showIndicator()
