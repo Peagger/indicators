@@ -121,6 +121,7 @@ class Indicators():
         '''个数除以总数得到比率'''
         total=(math.factorial(nums)//(math.factorial(k)*math.factorial(nums-k)))
         return self.count/total
+    
     def genAvgNodeDegree(self):
         '''生成全时段的平均节点度'''
         arr=[];df=self.df
@@ -154,10 +155,9 @@ class Indicators():
             listmartix.append(martixmap)
         for i in range(len(listmartix)):
             sum = np.sum(listmartix[i].reshape(-1))
-            avg = sum/(20*19)
+            avg = sum/(self.nums*(self.nums-1))
             avgminroute.append(avg.item())
         self.avg_min_route=avgminroute
-        pass
     def genKConnectivity(self):
         df=self.df;name_dict={};dp=[]
         for i in range(self.nums):
@@ -188,7 +188,6 @@ class Indicators():
                 # time=self.start+i*self.interval
                 # print('{:>3}s:{}连通率:{:.4f}%'.format(time,k,self.rate(self.nums,k)*100))
             self.kconnectivity.append(kconnectivity)
-
     def genAvgConcenDegree(self):
         pass
     def genConCeot(self):
