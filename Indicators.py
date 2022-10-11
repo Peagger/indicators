@@ -192,6 +192,76 @@ class Indicators():
                 # print('{:>3}s:{}连通率:{:.4f}%'.format(time,k,self.rate(self.nums,k)*100))
             self.kconnectivity.append(kconnectivity)
     def genAvgConcenDegree(self):
+        mylist=[];df=self.df;listmartix=[];avgminroute = []
+        for i in range(self.start,self.end+1,self.interval):
+            mylist.append(df[df[1]=="+"+str(i)+"s"])
+        end = []
+#         print(len(mylist))
+#         print(mylist)
+        for j in range(self.end - self.start + 1):
+            res = []
+            temp = mylist[j]
+#             print("============================")
+#             print(temp)
+            point = 0
+            for i in range(self.nums):
+                tmp = []
+                if point== len(temp):
+                    res.append(tmp)
+                    break
+                node = int(temp.iloc[point][0])
+#                 print(point)
+                while node==i :
+                    desnode = int(temp.iloc[point][2][7:])-1
+                    tmp.append(desnode)
+                    point = point+1
+                    if point==len(temp):
+                        break
+                    node = int(temp.iloc[point][0])
+                res.append(tmp)
+            end.append(res)
+        print(end[0])
+        result = []
+        for j in range(self.end - self.start + 1):
+            smp = end[j]
+            aroundsides = []
+            aroundnodes = []
+            aroundside = 0
+            oneres = []
+            finaloneans = 0
+            for i in range(self.nums):
+#                 print("===========")
+#                 print(smp[i])
+#                 print("============")
+                for point in range(len(smp[i])):
+#                     print("[[[[[[[[[[[[[[]]]]]]]]]]]]]]")
+#                     print(smp)
+#                     print(point)
+#                     print(f'{i}-----fdfff------{point}')
+                    secondpoint = smp[i][point]
+#                     print(secondpoint)
+                    aroundside = aroundside + len(set(smp[i]) & set(smp[secondpoint]))
+                   # print(smp[i])
+                   # print(smp[point])
+                   # print(aroundside)
+                #print(aroundside)
+                #print(len(smp[i]))
+                aroundnodes.append(len(smp[i]))
+                aroundsides.append(aroundside/2)
+                aroundside = 0
+            # print(aroundnodes)
+            for k in range(self.nums):
+                if aroundnodes[k] == 1 or aroundnodes[k] == 0 :
+                    oneres.append(0)
+                else:
+                    oneres.append(aroundsides[k]/(aroundnodes[k]*(aroundnodes[k]-1)))
+#             print("======")
+#             print(oneres)
+            finaloneans = np.mean(oneres)
+            result.append(finaloneans)
+        print(result)
+        print(len(result))
+        self.avg_concen_degree=result
         pass
     def genConCeot(self):
         df=self.df
@@ -233,11 +303,15 @@ class Indicators():
         self.genAvgConcenDegree()
         self.genConCeot()
         pass
+    def plot(self,indicator):
+        plt.figure()
+    
     def showIndicator(self):
         self.genIndicator()
         for indicator in [self.avg_node_degree,self.avg_min_route,self.kconnectivity,self.avg_concen_degree,self.con_coet]:
             print('{}项'.format(len(indicator)),end='')
             #print(indicator)
+        
         x_time = []
         for i in range(self.start,self.end+1,1):
             x_time.append(i)
