@@ -1,4 +1,5 @@
 
+import random
 import pandas as pd
 import numpy as np
 import networkx as nx
@@ -6,7 +7,11 @@ import networkx.algorithms.components as com
 import matplotlib.pyplot as plt
 import math
 class Indicators():
-    def __init__(self,csvpath='routes4.csv',nums=20,times=100,interval=1,start=3,end=100,kconnect=[2,3,20]):
+    def __init__(self,csvpath='routes4.csv',nums=20,times=100,interval=1,start=3,end=100,kconnect=[2,3,20],color='red'):
+        self.name_list=['avg_node_degree','avg_min_route','avg_concen_degree','con_coet']
+        for i in range (len(kconnect)):
+            self.name_list.append('{}connectivity'.format(kconnect[i]))
+        self.name=csvpath[-6:-4]
         self.df = pd.read_csv(csvpath,header=None)
         self.nums=nums              #节点数
         self.times=times            #时间长度
@@ -20,7 +25,8 @@ class Indicators():
         self.avg_min_route=[]       #平均最短路
         self.kconnectivity=[]       #k连通度
         self.avg_concen_degree=[]   #平均聚集系数
-        self.con_coet=[]        #连通系数
+        self.con_coet=[]            #连通系数
+        self.color=color            #图表颜色
         pass
 
     def printNodeDegree(self,time1):
@@ -171,7 +177,7 @@ class Indicators():
             AccessMatrix=[[0 for col in range(self.nums)] for row in range(self.nums)]
             for row in dp[i].itertuples():#读入邻接矩阵
                 i=int(row[1])
-                j=int(row[4][7:])
+                j=int(row[4][7:])-1
                 AccessMatrix[i][j]=1
             for k in range(self.nums):#warshall算法求传递闭包
                 for i in range(self.nums):
@@ -220,7 +226,6 @@ class Indicators():
                     node = int(temp.iloc[point][0])
                 res.append(tmp)
             end.append(res)
-        print(end[0])
         result = []
         for j in range(self.end - self.start + 1):
             smp = end[j]
@@ -259,8 +264,6 @@ class Indicators():
 #             print(oneres)
             finaloneans = np.mean(oneres)
             result.append(finaloneans)
-        print(result)
-        print(len(result))
         self.avg_concen_degree=result
         pass
     def genConCeot(self):
@@ -307,26 +310,47 @@ class Indicators():
         plt.figure()
     
     def showIndicator(self):
-        self.genIndicator()
-        for indicator in [self.avg_node_degree,self.avg_min_route,self.kconnectivity,self.avg_concen_degree,self.con_coet]:
-            print('{}项'.format(len(indicator)),end='')
-            #print(indicator)
+        self.genIndicator() #生成参数
+        # for indicator in [self.avg_node_degree,self.avg_min_route,self.kconnectivity,self.avg_concen_degree,self.con_coet]:
+        #     print('{}项'.format(len(indicator)),end='')
+        #     #print(indicator)
         
         x_time = []
         for i in range(self.start,self.end+1,1):
             x_time.append(i)
+        # for i in range(6):
+        #     plt.subplot(2,3,i+1)
+        # plt.show()
+        i=1
+
         for indicator in [self.avg_node_degree,self.avg_min_route,self.avg_concen_degree,self.con_coet]:
             if(len(indicator)==len(x_time)):
-                plt.figure()
-                plt.plot(x_time, indicator, color = 'red',)
+                plt.subplot(2,3,i)
+                plt.plot(x_time, indicator, color = self.color)
+                plt.title(self.name_list[i-1])
+                i+=1
         for indicator in self.kconnectivity:
             if(len(indicator)==len(x_time)):
-                plt.figure()
-                plt.plot(x_time, indicator, color = 'red',)
-        plt.show()
-        pass
+                plt.subplot(2,3,i)
+                plt.plot(x_time, indicator, color = self.color,label=self.name)
+                plt.legend()
+                plt.title(self.name_list[i-1])
+                i+=1
+        # plt.subplot(2,3,5)
+        # plt.plot(x_time, indicator, color = 'red',)
         
-
-
-i=Indicators(csvpath='routes.csv',nums=30,start=3,end=50,kconnect=[2,5])
-i.showIndicator()
+        #plt.show()
+        
+colortable=['red','yellow','green','gray','blue','black','cyan','purple','tomato','pink','brown']
+#colortable=['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r', 'CMRmap', 'CMRmap_r', 'Dark2', 'Dark2_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys', 'Greys_r', 'OrRd', 'OrRd_r', 'Oranges', 'Oranges_r', 'PRGn', 'PRGn_r', 'Paired', 'Paired_r', 'Pastel1', 'Pastel1_r', 'Pastel2', 'Pastel2_r', 'PiYG', 'PiYG_r', 'PuBu', 'PuBuGn', 'PuBuGn_r', 'PuBu_r', 'PuOr', 'PuOr_r', 'PuRd', 'PuRd_r', 'Purples', 'Purples_r', 'RdBu', 'RdBu_r', 'RdGy', 'RdGy_r', 'RdPu', 'RdPu_r', 'RdYlBu', 'RdYlBu_r', 'RdYlGn', 'RdYlGn_r', 'Reds', 'Reds_r', 'Set1', 'Set1_r', 'Set2', 'Set2_r', 'Set3', 'Set3_r', 'Spectral', 'Spectral_r', 'Wistia', 'Wistia_r', 'YlGn', 'YlGnBu', 'YlGnBu_r', 'YlGn_r', 'YlOrBr', 'YlOrBr_r', 'YlOrRd', 'YlOrRd_r', 'afmhot', 'afmhot_r', 'autumn', 'autumn_r', 'binary', 'binary_r', 'bone', 'bone_r', 'brg', 'brg_r', 'bwr', 'bwr_r', 'cividis', 'cividis_r', 'cool', 'cool_r', 'coolwarm', 'coolwarm_r', 'copper', 'copper_r', 'cubehelix', 'cubehelix_r', 'flag', 'flag_r', 'gist_earth', 'gist_earth_r', 'gist_gray', 'gist_gray_r', 'gist_heat', 'gist_heat_r', 'gist_ncar', 'gist_ncar_r', 'gist_rainbow', 'gist_rainbow_r', 'gist_stern', 'gist_stern_r', 'gist_yarg', 'gist_yarg_r', 'gnuplot', 'gnuplot2', 'gnuplot2_r', 'gnuplot_r', 'gray', 'gray_r', 'hot', 'hot_r', 'hsv', 'hsv_r', 'inferno', 'inferno_r', 'jet', 'jet_r', 'magma', 'magma_r', 'nipy_spectral', 'nipy_spectral_r', 'ocean', 'ocean_r', 'pink', 'pink_r', 'plasma', 'plasma_r', 'prism', 'prism_r', 'rainbow', 'rainbow_r', 'seismic', 'seismic_r', 'spring', 'spring_r', 'summer', 'summer_r', 'tab10', 'tab10_r', 'tab20', 'tab20_r', 'tab20b', 'tab20b_r', 'tab20c', 'tab20c_r', 'terrain', 'terrain_r', 'turbo', 'turbo_r', 'twilight', 'twilight_r', 'twilight_shifted', 'twilight_shifted_r', 'viridis', 'viridis_r', 'winter', 'winter_r']
+# i=Indicators(csvpath='routes/routes4_14.csv',nums=20,start=1,end=100,kconnect=[2,5],color=(255,21,21))
+# i.showIndicator()
+# i=Indicators(csvpath='routes/routes4_13.csv',nums=20,start=1,end=100,kconnect=[2,5],color=(21,23,66))
+# i.showIndicator()
+#plt.show()
+for i in range(11,20):
+    rnd=random.randint(0,len(colortable)-1)
+    color=colortable.pop(rnd)
+    indicator=Indicators(csvpath='routes/routes4_{}.csv'.format(i),nums=20,start=1,end=100,kconnect=[2,5],color=color)
+    indicator.showIndicator()
+plt.show()
