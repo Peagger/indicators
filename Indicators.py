@@ -7,11 +7,11 @@ import networkx.algorithms.components as com
 import matplotlib.pyplot as plt
 import math
 class Indicators():
-    def __init__(self,csvpath='routes4.csv',nums=20,times=100,interval=1,start=3,end=100,kconnect=[2,3,20],color='red'):
+    def __init__(self,csvpath='routes4.csv',nums=20,times=100,interval=1,start=3,end=100,kconnect=[2,3,20],color='red',name=0):
         self.name_list=['avg_node_degree','avg_min_route','avg_concen_degree','con_coet']
         for i in range (len(kconnect)):
             self.name_list.append('{}connectivity'.format(kconnect[i]))
-        self.name=csvpath[-6:-4]
+        self.name=name
         self.df = pd.read_csv(csvpath,header=None)
         self.nums=nums              #节点数
         self.times=times            #时间长度
@@ -340,17 +340,65 @@ class Indicators():
         # plt.plot(x_time, indicator, color = 'red',)
         
         #plt.show()
-        
-colortable=['red','yellow','green','gray','blue','black','cyan','purple','tomato','pink','brown']
+
+    def getIndicator(self):
+        self.genIndicator() #生成参数
+        a= [self.avg_node_degree,self.avg_min_route,self.avg_concen_degree,self.con_coet]
+        for indicator in self.kconnectivity:
+            a.append(indicator)
+        return a
+
+
+def rank(indicator):
+    ls=[]
+    sort_ls=[]
+    for i in range(len(indicator[0])):
+        for j in range(len(indicator)):
+            ls.append(np.mean(indicator[j][i]))
+        sort_ls=sorted(ls)
+        for k in range(len(sort_ls)):
+            indicator[k][i]=sort_ls.index(ls[k])
+        ls=[]
+    pass
+    ranklist=[]
+    for i in range(len(indicator)):#加权
+        scores=indicator[i][0]*0.0538+(indicator[i][4]+indicator[i][5])/2+indicator[i][1]*0.1087+indicator[i][2]*0.4758+indicator[i][3]*0.2636
+        ranklist.append(scores)
+    print(ranklist)
+def indicatorrank(i_list):
+    indicator_list=[]
+    for i in i_list:
+        indicator=Indicators(csvpath='routes/routes4_{}.csv'.format(i),nums=20,start=1,end=100,kconnect=[2,5],name=str(i))
+        indicator_list.append(indicator.getIndicator())
+    rank(indicator_list)
+    print(indicator_list)        
+colortable=['yellow','green','gray','blue','black','cyan','purple','tomato','pink','brown','Crimson','LavenderBlush','Violet','MediumOrchid','DarkBlue','SpringGreen','YellowGreen','Cornsilk','Ivory','Tan','Coral','Gainsboro']
 #colortable=['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r', 'CMRmap', 'CMRmap_r', 'Dark2', 'Dark2_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys', 'Greys_r', 'OrRd', 'OrRd_r', 'Oranges', 'Oranges_r', 'PRGn', 'PRGn_r', 'Paired', 'Paired_r', 'Pastel1', 'Pastel1_r', 'Pastel2', 'Pastel2_r', 'PiYG', 'PiYG_r', 'PuBu', 'PuBuGn', 'PuBuGn_r', 'PuBu_r', 'PuOr', 'PuOr_r', 'PuRd', 'PuRd_r', 'Purples', 'Purples_r', 'RdBu', 'RdBu_r', 'RdGy', 'RdGy_r', 'RdPu', 'RdPu_r', 'RdYlBu', 'RdYlBu_r', 'RdYlGn', 'RdYlGn_r', 'Reds', 'Reds_r', 'Set1', 'Set1_r', 'Set2', 'Set2_r', 'Set3', 'Set3_r', 'Spectral', 'Spectral_r', 'Wistia', 'Wistia_r', 'YlGn', 'YlGnBu', 'YlGnBu_r', 'YlGn_r', 'YlOrBr', 'YlOrBr_r', 'YlOrRd', 'YlOrRd_r', 'afmhot', 'afmhot_r', 'autumn', 'autumn_r', 'binary', 'binary_r', 'bone', 'bone_r', 'brg', 'brg_r', 'bwr', 'bwr_r', 'cividis', 'cividis_r', 'cool', 'cool_r', 'coolwarm', 'coolwarm_r', 'copper', 'copper_r', 'cubehelix', 'cubehelix_r', 'flag', 'flag_r', 'gist_earth', 'gist_earth_r', 'gist_gray', 'gist_gray_r', 'gist_heat', 'gist_heat_r', 'gist_ncar', 'gist_ncar_r', 'gist_rainbow', 'gist_rainbow_r', 'gist_stern', 'gist_stern_r', 'gist_yarg', 'gist_yarg_r', 'gnuplot', 'gnuplot2', 'gnuplot2_r', 'gnuplot_r', 'gray', 'gray_r', 'hot', 'hot_r', 'hsv', 'hsv_r', 'inferno', 'inferno_r', 'jet', 'jet_r', 'magma', 'magma_r', 'nipy_spectral', 'nipy_spectral_r', 'ocean', 'ocean_r', 'pink', 'pink_r', 'plasma', 'plasma_r', 'prism', 'prism_r', 'rainbow', 'rainbow_r', 'seismic', 'seismic_r', 'spring', 'spring_r', 'summer', 'summer_r', 'tab10', 'tab10_r', 'tab20', 'tab20_r', 'tab20b', 'tab20b_r', 'tab20c', 'tab20c_r', 'terrain', 'terrain_r', 'turbo', 'turbo_r', 'twilight', 'twilight_r', 'twilight_shifted', 'twilight_shifted_r', 'viridis', 'viridis_r', 'winter', 'winter_r']
 # i=Indicators(csvpath='routes/routes4_14.csv',nums=20,start=1,end=100,kconnect=[2,5],color=(255,21,21))
 # i.showIndicator()
 # i=Indicators(csvpath='routes/routes4_13.csv',nums=20,start=1,end=100,kconnect=[2,5],color=(21,23,66))
 # i.showIndicator()
 #plt.show()
-for i in range(11,20):
-    rnd=random.randint(0,len(colortable)-1)
-    color=colortable.pop(rnd)
-    indicator=Indicators(csvpath='routes/routes4_{}.csv'.format(i),nums=20,start=1,end=100,kconnect=[2,5],color=color)
-    indicator.showIndicator()
-plt.show()
+
+# for i in range(0,20):
+#     rnd=random.randint(0,len(colortable)-1)
+#     color=colortable.pop(rnd)
+#     indicator=Indicators(csvpath='routes/routes4_{}.csv'.format(i),nums=20,start=1,end=100,kconnect=[2,5],color=color,name=str(i))
+#     indicator.showIndicator()
+#     print("第{}张".format(i))
+i_list=range(0,20)
+indicatorrank(i_list)
+# for i in i_list:
+#     rnd=random.randint(0,len(colortable)-1)
+#     color=colortable.pop(rnd)
+#     indicator=Indicators(csvpath='routes/routes4_{}.csv'.format(i),nums=20,start=1,end=100,kconnect=[2,5],color=color,name=str(i))
+#     indicator.showIndicator()
+#     print("第{}张".format(i))
+# indicator=Indicators(csvpath='routes/routes4_00.csv',nums=20,start=1,end=100,kconnect=[2,5],color='red',name='00')
+# indicator.showIndicator()
+
+# # indicator=Indicators(csvpath='routes/routes4_12_001_0.csv',nums=20,start=1,end=100,kconnect=[2,5],color='blue')
+# # indicator.showIndicator()
+# # indicator=Indicators(csvpath='routes/routes4_13_001_0.csv',nums=20,start=1,end=100,kconnect=[2,5],color='green')
+# # indicator.showIndicator()
+# plt.show()
